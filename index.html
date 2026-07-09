@@ -3,146 +3,180 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Painel de Turmas — Arrematador</title>
+<title>Painel Comercial — Arrematador</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
 <style>
   :root{
-    --bg-main:#EEF0F3;
-    --bg-sidebar:#12192B;
-    --bg-sidebar-alt:#1B2440;
+    --bg-main:#F3F1EC;
+    --bg-panel:#FFFFFF;
+    --navy:#12192B;
+    --navy-alt:#1B2440;
     --gold:#C9973D;
     --gold-light:#E7C583;
-    --gold-dim:#8A6A2E;
     --teal:#3E8E8A;
     --teal-light:#8FC9C6;
+    --purple:#6B3FA0;
+    --purple-light:#D9C6EE;
     --text-dark:#1B2436;
     --text-mid:#5B6478;
-    --text-light:#F5F6F8;
     --text-light-dim:#AEB6CC;
-    --card-bg:#FFFFFF;
-    --border:#DDE1E8;
+    --border:#E2DFD6;
     --border-dark:#2A3352;
     --green:#2F7A4F;
     --amber:#B8842A;
     --red:#B4462F;
+    --card-bg:#FFFFFF;
   }
   *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
   html,body{margin:0;padding:0;}
-  body{font-family:'Inter',sans-serif; background:var(--bg-main); color:var(--text-dark); display:flex; min-height:100vh;}
+  body{font-family:'Inter',sans-serif; background:var(--bg-main); color:var(--text-dark);}
   ::selection{background:var(--gold-light);}
+  h1,h2,h3{margin:0;}
+  a{color:inherit;}
 
-  .sidebar{
-    width:360px; min-width:360px; background:var(--bg-sidebar); color:var(--text-light);
-    padding:32px 26px 40px; display:flex; flex-direction:column; gap:24px;
-    position:sticky; top:0; height:100vh; overflow-y:auto;
+  /* ===== TOP BAR ===== */
+  .topbar{
+    position:sticky; top:0; z-index:100;
+    background:var(--navy); color:#fff;
+    display:flex; align-items:center; gap:18px;
+    padding:14px 28px; flex-wrap:wrap;
+    border-bottom:1px solid var(--border-dark);
   }
-  .brand{display:flex; flex-direction:column; gap:2px; border-bottom:1px solid var(--border-dark); padding-bottom:20px;}
-  .brand .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:11px; letter-spacing:.14em; color:var(--gold-light); text-transform:uppercase;}
-  .brand h1{font-family:'Fraunces',serif; font-weight:600; font-size:25px; margin:4px 0 0; line-height:1.1;}
-  .brand p{margin:6px 0 0; font-size:12px; color:var(--text-light-dim); line-height:1.5;}
+  .brand{display:flex; flex-direction:column; margin-right:12px;}
+  .brand .eyebrow{font-family:'IBM Plex Mono',monospace; font-size:9.5px; letter-spacing:.14em; color:var(--gold-light); text-transform:uppercase;}
+  .brand h1{font-family:'Fraunces',serif; font-weight:600; font-size:19px; line-height:1.1;}
+  .filter-bar{display:flex; gap:8px; flex-wrap:wrap; flex:1;}
+  .status-mini{display:flex; align-items:center; gap:8px; font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--text-light-dim); margin-left:auto;}
+  .status-dot{width:7px; height:7px; border-radius:50%; background:var(--amber);}
+  .status-dot.ok{background:#4FAE73;}
+  .status-dot.err{background:var(--red);}
+  .refresh-btn-mini{
+    background:none; border:1px solid var(--border-dark); color:var(--gold-light); padding:5px 10px;
+    border-radius:5px; font-family:'IBM Plex Mono',monospace; font-size:10px; cursor:pointer; text-transform:uppercase;
+  }
+  .refresh-btn-mini:hover{border-color:var(--gold-light);}
 
-  .filter-block{display:flex; flex-direction:column; gap:11px;}
-  .filter-label{
-    font-family:'IBM Plex Mono',monospace; font-size:10.5px; text-transform:uppercase; letter-spacing:.1em;
-    color:var(--text-light-dim); display:flex; justify-content:space-between; align-items:center;
+  /* dropdown filter */
+  .dd{position:relative;}
+  .dd-toggle{
+    background:var(--navy-alt); border:1px solid var(--border-dark); color:#fff;
+    padding:8px 12px; border-radius:6px; font-size:12.5px; cursor:pointer;
+    display:flex; align-items:center; gap:6px; white-space:nowrap;
   }
-
-  .lots{display:grid; grid-template-columns:1fr 1fr 1fr; gap:8px;}
-  .lot{
-    position:relative; background:var(--bg-sidebar-alt); border:1px solid var(--border-dark); border-radius:6px;
-    padding:8px 8px 7px; cursor:pointer; transition:transform .15s ease, border-color .15s ease, background .15s ease; text-align:left;
+  .dd-toggle .dd-label{color:var(--text-light-dim); font-size:10.5px; font-family:'IBM Plex Mono',monospace; text-transform:uppercase;}
+  .dd-toggle .dd-value{font-weight:600;}
+  .dd-toggle .chev{font-size:9px; color:var(--text-light-dim); margin-left:2px;}
+  .dd-toggle:hover{border-color:var(--gold-light);}
+  .dd.open .dd-toggle{border-color:var(--gold);}
+  .dd-panel{
+    display:none; position:absolute; top:calc(100% + 6px); left:0; min-width:230px; max-width:320px;
+    background:var(--navy-alt); border:1px solid var(--border-dark); border-radius:8px; padding:10px;
+    box-shadow:0 12px 32px rgba(0,0,0,.35); z-index:200;
   }
-  .lot .lot-tag{font-family:'IBM Plex Mono',monospace; font-size:8.5px; letter-spacing:.06em; color:var(--text-light-dim); text-transform:uppercase;}
-  .lot .lot-name{font-family:'Fraunces',serif; font-size:16px; font-weight:600; margin-top:1px; color:var(--text-light);}
-  .lot .lot-count{font-family:'IBM Plex Mono',monospace; font-size:9.5px; color:var(--gold-light); margin-top:2px;}
-  .lot.active{background:var(--gold); border-color:var(--gold);}
-  .lot.active .lot-name,.lot.active .lot-tag,.lot.active .lot-count{color:var(--bg-sidebar);}
-  .lot:hover{transform:translateY(-1px);}
-  .lot.all-lot{grid-column:1 / -1;}
-  .lot.disabled{opacity:.35; cursor:not-allowed;}
-  .lot.disabled:hover{transform:none;}
-  .group-teal .lot.active{background:var(--teal); border-color:var(--teal);}
-  .group-teal .lot.active .lot-name,.group-teal .lot.active .lot-tag,.group-teal .lot.active .lot-count{color:var(--bg-sidebar);}
-
-  /* multi-select detail groups */
-  details.msel{background:var(--bg-sidebar-alt); border:1px solid var(--border-dark); border-radius:6px; overflow:hidden;}
-  details.msel > summary{
-    list-style:none; cursor:pointer; padding:10px 12px; display:flex; justify-content:space-between; align-items:center;
-    font-size:13px; color:var(--text-light);
+  .dd.open .dd-panel{display:block;}
+  .dd-panel .lots{display:grid; grid-template-columns:1fr 1fr; gap:6px;}
+  .dd-panel .lot{
+    background:#232D4E; border:1px solid var(--border-dark); border-radius:6px; padding:7px 8px;
+    cursor:pointer; text-align:left; color:#fff; font-size:12px;
   }
-  details.msel > summary::-webkit-details-marker{display:none;}
-  details.msel > summary .chev{color:var(--text-light-dim); font-size:11px; transition:transform .15s;}
-  details.msel[open] > summary .chev{transform:rotate(180deg);}
-  details.msel .msel-count{
-    font-family:'IBM Plex Mono',monospace; font-size:10.5px; color:var(--gold-light); background:rgba(201,151,61,.15);
-    padding:2px 7px; border-radius:10px; margin-left:8px;
-  }
-  .msel-body{padding:4px 8px 10px; border-top:1px solid var(--border-dark); max-height:220px; overflow-y:auto;}
-  .msel-actions{display:flex; gap:6px; padding:6px 4px 8px;}
-  .msel-actions button{
+  .dd-panel .lot.active{background:var(--gold); border-color:var(--gold); color:var(--navy); font-weight:600;}
+  .dd-panel .lot.all-span{grid-column:1/-1;}
+  .dd-panel .lot.disabled{opacity:.35; cursor:not-allowed;}
+  .dd-panel .lot-count{font-family:'IBM Plex Mono',monospace; font-size:9.5px; opacity:.7; margin-top:2px;}
+  .dd-panel .msel-actions{display:flex; gap:6px; margin-bottom:8px;}
+  .dd-panel .msel-actions button{
     background:none; border:1px solid var(--border-dark); color:var(--text-light-dim); font-size:10px;
     font-family:'IBM Plex Mono',monospace; padding:4px 8px; border-radius:4px; cursor:pointer; text-transform:uppercase;
   }
-  .msel-actions button:hover{border-color:var(--gold-light); color:var(--gold-light);}
-  label.msel-opt{
-    display:flex; align-items:center; gap:8px; padding:5px 4px; font-size:12.5px; color:var(--text-light-dim);
-    cursor:pointer; border-radius:4px;
+  .dd-panel .msel-list{max-height:220px; overflow-y:auto;}
+  .dd-panel label.msel-opt{
+    display:flex; align-items:center; gap:8px; padding:5px 4px; font-size:12.5px; color:var(--text-light-dim); cursor:pointer; border-radius:4px;
   }
-  label.msel-opt:hover{background:rgba(255,255,255,.04); color:var(--text-light);}
-  label.msel-opt input{accent-color:var(--gold); width:14px; height:14px; flex-shrink:0;}
-  label.msel-opt.none-opt{border-top:1px dashed var(--border-dark); margin-top:4px; padding-top:8px; font-style:italic;}
-
-  .divider{height:1px; background:var(--border-dark); margin:2px 0;}
-  .reset-btn{margin-top:auto; padding-top:16px; border-top:1px solid var(--border-dark);}
-  .reset-btn button{
-    width:100%; background:none; border:1px solid var(--border-dark); color:var(--text-light-dim); padding:10px;
-    border-radius:6px; font-family:'IBM Plex Mono',monospace; font-size:11.5px; letter-spacing:.06em;
-    text-transform:uppercase; cursor:pointer; transition:border-color .15s, color .15s;
+  .dd-panel label.msel-opt:hover{background:rgba(255,255,255,.06); color:#fff;}
+  .dd-panel label.msel-opt input{accent-color:var(--gold); width:14px; height:14px;}
+  .dd-panel label.msel-opt.none-opt{border-top:1px dashed var(--border-dark); margin-top:4px; padding-top:8px; font-style:italic;}
+  .reset-btn-top{
+    background:none; border:1px solid var(--border-dark); color:var(--text-light-dim); padding:8px 12px;
+    border-radius:6px; font-family:'IBM Plex Mono',monospace; font-size:11px; cursor:pointer; text-transform:uppercase;
   }
-  .reset-btn button:hover{border-color:var(--gold-light); color:var(--gold-light);}
+  .reset-btn-top:hover{color:var(--gold-light); border-color:var(--gold-light);}
 
-  .main{flex:1; padding:40px 44px 60px; min-width:0;}
-  .main-header{display:flex; justify-content:space-between; align-items:flex-end; gap:24px; margin-bottom:28px; flex-wrap:wrap;}
-  .main-header h2{font-family:'IBM Plex Mono',monospace; font-weight:600; color:var(--text-mid); margin:0 0 8px; text-transform:uppercase; font-size:12px; letter-spacing:.12em;}
-  .lens-tag{display:inline-flex; align-items:center; gap:6px; background:#E4F1F0; color:var(--teal); border-radius:20px; padding:3px 10px; font-size:11.5px; font-family:'IBM Plex Mono',monospace; margin-left:8px;}
-  .total-count{font-family:'Fraunces',serif; font-weight:700; font-size:54px; line-height:1; letter-spacing:-.01em;}
-  .total-sub{font-size:13px; color:var(--text-mid); margin-top:6px;}
+  /* ===== LAYOUT / FOLDS ===== */
+  main{max-width:1360px; margin:0 auto; padding:0 28px;}
+  section.fold{padding:36px 0 56px;}
+  .fold-header{display:flex; align-items:baseline; justify-content:space-between; gap:16px; margin-bottom:22px; flex-wrap:wrap;}
+  .fold-header h2{font-family:'Fraunces',serif; font-size:26px; font-weight:600;}
+  .fold-header .sub{font-size:13px; color:var(--text-mid);}
+  .scroll-cta{
+    display:inline-flex; align-items:center; gap:6px; background:var(--navy); color:#fff; border:none;
+    padding:11px 20px; border-radius:24px; font-size:13px; cursor:pointer; font-weight:600;
+  }
+  .scroll-cta:hover{background:var(--navy-alt);}
 
-  .stats-row{display:grid; grid-template-columns:repeat(auto-fit,minmax(150px,1fr)); gap:14px; margin-bottom:14px;}
-  .stat-card{background:var(--card-bg); border:1px solid var(--border); border-radius:10px; padding:16px 18px;}
-  .stat-card .num{font-family:'IBM Plex Mono',monospace; font-size:24px; font-weight:600;}
-  .stat-card .lbl{font-size:12px; color:var(--text-mid); margin-top:4px;}
-  .stat-card.green .num{color:var(--green);}
-  .stat-card.amber .num{color:var(--amber);}
-  .stat-card.red .num{color:var(--red);}
+  /* KPI cards */
+  .kpi-row{display:grid; grid-template-columns:repeat(5,1fr); gap:14px; margin-bottom:28px;}
+  .kpi-card{background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:20px 20px;}
+  .kpi-card .num{font-family:'Fraunces',serif; font-size:34px; font-weight:700; line-height:1;}
+  .kpi-card .lbl{font-size:12px; color:var(--text-mid); margin-top:8px; line-height:1.4;}
+  .kpi-card.hero{background:var(--navy); color:#fff; grid-column:span 1;}
+  .kpi-card.hero .lbl{color:var(--text-light-dim);}
+  .kpi-card.accent .num{color:var(--gold-dim,#8A6A2E);}
+  .kpi-card.green .num{color:var(--green);}
+  .kpi-card.red .num{color:var(--red);}
+  .kpi-card.purple .num{color:var(--purple);}
 
-  .matrix-section{margin:30px 0;}
-  .section-title{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.1em; color:var(--text-mid); margin-bottom:12px; display:flex; align-items:center; justify-content:space-between;}
-  table.matrix{width:100%; border-collapse:collapse; background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden;}
-  table.matrix th,table.matrix td{padding:14px 16px; text-align:left; border-bottom:1px solid var(--border); font-size:13.5px;}
-  table.matrix th{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.06em; color:var(--text-mid); background:#F7F8FA;}
-  table.matrix td.num{font-family:'IBM Plex Mono',monospace; font-weight:600; font-size:15px;}
-  table.matrix tr:last-child td{border-bottom:none;}
-  table.matrix td.rowlabel{font-weight:600;}
+  /* Chart grid */
+  .chart-grid{display:grid; grid-template-columns:1.3fr 1fr; gap:16px; margin-bottom:16px;}
+  .chart-grid-2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  .chart-card{background:var(--card-bg); border:1px solid var(--border); border-radius:12px; padding:20px 22px;}
+  .chart-card h3{font-family:'IBM Plex Mono',monospace; font-size:11px; text-transform:uppercase; letter-spacing:.08em; color:var(--text-mid); margin-bottom:16px; font-weight:600;}
+  .bar-row{display:flex; align-items:center; gap:10px; margin-bottom:12px;}
+  .bar-row:last-child{margin-bottom:0;}
+  .bar-label{width:140px; font-size:12px; color:var(--text-mid); flex-shrink:0;}
+  .bar-track{flex:1; height:22px; background:#F0EEE7; border-radius:5px; overflow:hidden; display:flex;}
+  .bar-fill{height:100%; display:flex; align-items:center; transition:width .4s ease;}
+  .bar-fill.aluno{background:var(--green);}
+  .bar-fill.naoaluno{background:#E2DFD6;}
+  .bar-fill-solid{background:var(--gold);}
+  .bar-value{width:110px; text-align:right; font-family:'IBM Plex Mono',monospace; font-size:11.5px; color:var(--text-mid); flex-shrink:0;}
+  .legend-row{display:flex; gap:16px; margin-top:14px; font-size:11.5px; color:var(--text-mid);}
+  .legend-dot{display:inline-block; width:9px; height:9px; border-radius:2px; margin-right:5px;}
 
+  .donut-wrap{display:flex; align-items:center; gap:20px;}
+  .donut-legend{display:flex; flex-direction:column; gap:8px; font-size:12px;}
+  .donut-legend .item{display:flex; align-items:center; gap:7px;}
+  .donut-legend .swatch{width:10px; height:10px; border-radius:2px; flex-shrink:0;}
+  .donut-legend .lname{color:var(--text-mid);}
+  .donut-legend .lval{font-family:'IBM Plex Mono',monospace; font-weight:600; margin-left:4px;}
+
+  /* ===== SECTION 2 (dados) ===== */
+  .data-block{margin-bottom:44px;}
+  .data-block-header{display:flex; align-items:center; justify-content:space-between; gap:16px; flex-wrap:wrap; margin-bottom:14px;}
+  .data-block-header h3{font-family:'Fraunces',serif; font-size:19px; font-weight:600;}
   .table-toolbar{display:flex; align-items:center; gap:14px; flex-wrap:wrap;}
   .toggle-contact{display:flex; align-items:center; gap:7px; font-size:12px; color:var(--text-mid); cursor:pointer;}
   .toggle-contact input{accent-color:var(--gold); width:14px; height:14px;}
   .export-btn{
-    background:var(--text-dark); color:#fff; border:none; padding:8px 16px; border-radius:6px; font-size:12.5px;
+    background:var(--navy); color:#fff; border:none; padding:9px 16px; border-radius:6px; font-size:12.5px;
     font-family:'IBM Plex Mono',monospace; letter-spacing:.03em; cursor:pointer; display:flex; align-items:center; gap:7px;
-    transition:background .15s;
   }
-  .export-btn:hover{background:#333F58;}
+  .export-btn:hover{background:var(--navy-alt);}
   .export-btn svg{width:13px; height:13px;}
+  .inline-lots{display:flex; gap:8px; flex-wrap:wrap; margin-bottom:14px;}
+  .inline-lots .lot{
+    background:#fff; border:1px solid var(--border); border-radius:7px; padding:8px 12px; cursor:pointer; font-size:12.5px;
+  }
+  .inline-lots .lot.active{background:var(--navy); border-color:var(--navy); color:#fff; font-weight:600;}
+  .inline-lots .lot .lot-count-inline{font-family:'IBM Plex Mono',monospace; font-size:10.5px; opacity:.6; margin-left:5px;}
 
   .table-wrap{background:var(--card-bg); border:1px solid var(--border); border-radius:10px; overflow:hidden;}
   .table-scroll{max-height:560px; overflow:auto;}
   table.leads{width:100%; border-collapse:collapse; font-size:13px;}
   table.leads thead th{
-    position:sticky; top:0; background:#F7F8FA; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
+    position:sticky; top:0; background:#F7F6F1; font-family:'IBM Plex Mono',monospace; font-size:10.5px;
     text-transform:uppercase; letter-spacing:.06em; color:var(--text-mid); padding:10px 14px; text-align:left;
     border-bottom:1px solid var(--border); white-space:nowrap;
   }
@@ -154,96 +188,95 @@
   .badge.entrou-grande{background:#E6F2EA; color:var(--green);}
   .badge.entrou-pouco{background:#FBF0DC; color:var(--amber);}
   .badge.nao-entrou{background:#F7E7E3; color:var(--red);}
-  .badge.compra2{background:#EFE6F7; color:#6B3FA0;}
+  .badge.compra2{background:#EFE6F7; color:var(--purple);}
   .badge.compra1{background:#EAEDF2; color:var(--text-mid);}
   .empty-val{color:#C3C8D3; font-style:italic;}
   .count-pill{font-family:'IBM Plex Mono',monospace; font-size:11px; color:var(--text-mid); padding:8px 0;}
-  @media (max-width:900px){ body{flex-direction:column;} .sidebar{width:100%; min-width:0; height:auto; position:relative;} }
-
-  .group-purple .lot.active{background:#6B3FA0; border-color:#6B3FA0;}
-  .group-purple .lot.active .lot-name,.group-purple .lot.active .lot-tag,.group-purple .lot.active .lot-count{color:#fff;}
-  .metric-card{
-    background:linear-gradient(135deg,#1B2440,#12192B); color:var(--text-light); border-radius:10px;
-    padding:18px 20px; display:flex; flex-direction:column; gap:4px; grid-column: span 2;
+  .preview-banner{
+    background:#FDF3DD; border:1px solid #E9CE8C; color:#6B5219; border-radius:10px; padding:14px 18px;
+    font-size:12.5px; margin-bottom:24px; line-height:1.5;
   }
-  .metric-card .num{font-family:'Fraunces',serif; font-size:28px; font-weight:700; color:var(--gold-light);}
-  .metric-card .lbl{font-size:11.5px; color:var(--text-light-dim); line-height:1.4;}
+  .preview-banner b{color:#4A3A0F;}
+  @media (max-width:1100px){
+    .kpi-row{grid-template-columns:repeat(2,1fr);}
+    .chart-grid, .chart-grid-2{grid-template-columns:1fr;}
+  }
+
+  .error-banner{
+    background:#3A2020; border:1px solid #6B3030; color:#F5C6C0; border-radius:10px;
+    padding:16px 18px; font-size:13px; line-height:1.6; margin-bottom:20px;
+  }
+  .error-banner a{color:#FFD9A0;}
+  .status-dot.loading{animation:pulseDot 1s infinite;}
+  .status-dot.err{background:var(--red);}
+  @keyframes pulseDot{0%,100%{opacity:1;}50%{opacity:.3;}}
 </style>
 </head>
 <body>
 
-<aside class="sidebar">
+<header class="topbar">
   <div class="brand">
-    <span class="eyebrow">Arrematador · Painel Interno</span>
-    <h1>Painel de Turmas</h1>
-    <p>Cruze turma de compra, turma ao vivo e status de aluno para entender o funil completo.</p>
+    <span class="eyebrow">Arrematador · Comercial</span>
+    <h1>Painel de Conversão</h1>
   </div>
+  <div class="filter-bar" id="filterBar"></div>
+  <div class="status-mini">
+    <span class="status-dot" id="statusDot"></span>
+    <span id="statusText">Carregando dados da planilha…</span>
+    <button class="refresh-btn-mini" id="refreshBtn">Atualizar agora</button>
+    <button class="reset-btn-top" id="resetBtn">Limpar filtros</button>
+  </div>
+</header>
 
-  <div class="status-bar" id="statusBar">
-    <div class="status-row">
-      <span class="status-dot" id="statusDot"></span>
-      <span id="statusText">Carregando dados da planilha…</span>
-    </div>
-    <button id="refreshBtn" class="refresh-btn">Atualizar agora</button>
-  </div>
+<main>
 
-  <div class="filter-block">
-    <div class="filter-label"><span>Turma de compra (origem)</span></div>
-    <div class="lots" id="lotsCompra"></div>
-  </div>
-
-  <div class="filter-block group-teal">
-    <div class="filter-label"><span>Turma ao vivo (lente)</span></div>
-    <div class="lots" id="lotsAoVivo"></div>
-  </div>
-
-  <div class="filter-block group-purple">
-    <div class="filter-label"><span>Status de aluno</span></div>
-    <div class="lots" id="lotsAluno"></div>
-  </div>
-
-  <div class="divider"></div>
-
-  <div class="filter-block">
-    <div class="filter-label"><span>Sexo</span></div>
-    <details class="msel" id="msel-sexo"></details>
-  </div>
-  <div class="filter-block">
-    <div class="filter-label"><span>Renda</span></div>
-    <details class="msel" id="msel-renda"></details>
-  </div>
-  <div class="filter-block">
-    <div class="filter-label"><span>Patrimônio</span></div>
-    <details class="msel" id="msel-patrimonio"></details>
-  </div>
-  <div class="filter-block">
-    <div class="filter-label"><span>Arrematou</span></div>
-    <details class="msel" id="msel-arrematou"></details>
-  </div>
-
-  <div class="reset-btn"><button id="resetBtn">Limpar filtros</button></div>
-</aside>
-
-<main class="main">
-  <div class="main-header">
+<section class="fold" id="dashboard">
+  <div class="fold-header">
     <div>
-      <h2><span id="scopeLabel">Todas as turmas</span> <span class="lens-tag" id="lensTag"></span></h2>
-      <div class="total-count" id="totalCount">0</div>
-      <div class="total-sub" id="totalSub">leads correspondendo aos filtros</div>
+      <h2>Visão Geral</h2>
+      <div class="sub">Combina leads da Imersão com leads paralelos que usaram serviços ABX — atualiza conforme os filtros no topo.</div>
     </div>
-    <div class="stats-row" id="statsRow"></div>
+    <button class="scroll-cta" onclick="document.getElementById('dados').scrollIntoView()">Ver dados completos ↓</button>
   </div>
 
-  <div class="matrix-section">
-    <div class="section-title">Compra × Participação</div>
-    <table class="matrix" id="matrixTable"></table>
+  <div class="kpi-row" id="kpiRow"></div>
+
+  <div class="chart-grid">
+    <div class="chart-card">
+      <h3>Aluno × Não Aluno por Fonte</h3>
+      <div id="chartFonte"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Status ABX — Leads da Imersão</h3>
+      <div id="chartAbxDonut"></div>
+    </div>
   </div>
 
-  <div class="matrix-section">
-    <div class="section-title">
-      <span>Leads (<span id="tableCount">0</span>)</span>
+  <div class="chart-grid-2">
+    <div class="chart-card">
+      <h3>Participação Ao Vivo (lente atual)</h3>
+      <div id="chartParticipacao"></div>
+    </div>
+    <div class="chart-card">
+      <h3>Leads por Turma de Compra</h3>
+      <div id="chartTurmas"></div>
+    </div>
+  </div>
+</section>
+
+<section class="fold" id="dados">
+  <div class="fold-header">
+    <div>
+      <h2>Dados Completos</h2>
+      <div class="sub">Tabelas detalhadas com todos os campos, prontas para exportar.</div>
+    </div>
+  </div>
+
+  <div class="data-block">
+    <div class="data-block-header">
+      <h3>Leads da Imersão (<span id="tableCount">0</span>)</h3>
       <div class="table-toolbar">
-        <label class="toggle-contact"><input type="checkbox" id="toggleContact"> Mostrar email/telefone na tabela</label>
+        <label class="toggle-contact"><input type="checkbox" id="toggleContact"> Mostrar email/telefone</label>
         <button class="export-btn" id="exportBtn">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
           Exportar CSV
@@ -263,6 +296,7 @@
               <th>Duração (lente)</th>
               <th>Participação</th>
               <th>Aluno?</th>
+              <th>Utilizou ABX</th>
               <th>Sexo</th>
               <th>Renda</th>
               <th>Patrimônio</th>
@@ -274,6 +308,39 @@
       </div>
     </div>
   </div>
+
+  <div class="data-block">
+    <div class="data-block-header">
+      <h3>Leads Paralelos — Serviços ABX (<span id="paraTableCount">0</span>)</h3>
+      <div class="table-toolbar">
+        <button class="export-btn" id="exportParaBtn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3v12m0 0l-4-4m4 4l4-4M4 19h16"/></svg>
+          Exportar CSV
+        </button>
+      </div>
+    </div>
+    <div class="inline-lots" id="lotsSegmento"></div>
+    <div class="inline-lots" id="lotsAlunoParalelo"></div>
+    <div class="table-wrap">
+      <div class="table-scroll">
+        <table class="leads" id="paraLeadsTable">
+          <thead>
+            <tr>
+              <th>Nome</th>
+              <th class="contact-col">Email</th>
+              <th class="contact-col">Telefone</th>
+              <th>Segmento</th>
+              <th>Status</th>
+              <th>Aluno?</th>
+            </tr>
+          </thead>
+          <tbody id="paraLeadsBody"></tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
 </main>
 
 <script>
@@ -281,12 +348,18 @@ const SPREADSHEET_ID = "1-q6sSLtCw9MqGemO7wycUaKNRxaPgq-ZVBOGvK-yNtQ";
 const GID_IMERSOES = "483566932";
 const GID_AOVIVO = "891818631";
 const GID_PESQUISAS = "2084105115";
+const GID_ARM_ABX = "126175716";
+const GID_NAO_PAGOU = "249950797";
+const GID_LANCE = "2123900460";
 const AUTO_REFRESH_MINUTES = 5;
 
 let TURMAS_AO_VIVO = [];
 let DATA = [];
-const IDX = {nome:0, email:1, telefone:2, turmas:3, compra:4, qtd:5, aovivo:6, sexo:7, idade:8, renda:9, patrimonio:10, arrematou:11, aluno:12};
+let PARALLEL_DATA = [];
+const IDX = {nome:0, email:1, telefone:2, turmas:3, compra:4, qtd:5, aovivo:6, sexo:7, idade:8, renda:9, patrimonio:10, arrematou:11, aluno:12, abx:13};
+const PIDX = {nome:0, email:1, telefone:2, segmento:3, status:4, aluno:5};
 const ALL_TURMAS = ["T17","T18","T19","T20","T21","T22"];
+const SEGMENTOS = ["Arrematou ABX","Não Pagou Boleto","Lance não Vencedor"];
 
 function csvUrl(gid){
   return `https://docs.google.com/spreadsheets/d/${SPREADSHEET_ID}/gviz/tq?tqx=out:csv&gid=${gid}&t=${Date.now()}`;
@@ -316,17 +389,22 @@ function parseCSV(str) {
 
 function normEmail(e){ return (e||'').trim().toLowerCase(); }
 function normPhone(p){ return (p||'').replace(/\D/g,''); }
+function normVal(v){ return (v||'').trim(); }
+function normalizeAlunoLabel(v){ const t=(v||'').trim(); return t==='Aluno' ? 'Aluno' : 'Não é Aluno'; }
 
 async function fetchAndProcess(){
-  const [imersoesCsv, aovivoCsv, pesquisasCsv] = await Promise.all([
+  const [imersoesCsv, aovivoCsv, pesquisasCsv, abxCsv, naopagouCsv, lanceCsv] = await Promise.all([
     fetch(csvUrl(GID_IMERSOES)).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); }),
     fetch(csvUrl(GID_AOVIVO)).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); }),
-    fetch(csvUrl(GID_PESQUISAS)).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); })
+    fetch(csvUrl(GID_PESQUISAS)).then(r=>{ if(!r.ok) throw new Error('HTTP '+r.status); return r.text(); }),
+    fetch(csvUrl(GID_ARM_ABX)).then(r=>r.ok? r.text() : '').catch(()=>''),
+    fetch(csvUrl(GID_NAO_PAGOU)).then(r=>r.ok? r.text() : '').catch(()=>''),
+    fetch(csvUrl(GID_LANCE)).then(r=>r.ok? r.text() : '').catch(()=>'')
   ]);
 
-  const imersoesRows = parseCSV(imersoesCsv).slice(1); // Nome(0),Email(1),Telefone(2),Origem(3)...Comprou Mentoria(15)
-  const aovivoRows = parseCSV(aovivoCsv).slice(1); // DATA,NOME,EMAIL(2),TELEFONE(3),Imersao(4),Duracao(5)
-  const pesquisasRows = parseCSV(pesquisasCsv).slice(1); // Email(0),nome,Sexo(2),Idade(3)...renda(8),patrimonio(9),Arrematou(10)
+  const imersoesRows = parseCSV(imersoesCsv).slice(1);
+  const aovivoRows = parseCSV(aovivoCsv).slice(1);
+  const pesquisasRows = parseCSV(pesquisasCsv).slice(1);
 
   if(imersoesRows.length < 2) throw new Error('Aba Imersões retornou vazia — verifique compartilhamento da planilha.');
 
@@ -390,301 +468,408 @@ async function fetchAndProcess(){
       return [presente ? 1 : 0, dur];
     });
     const pesquisa = pesquisaMap[email] || null;
-    // Aluno status: any row for this lead marked "Aluno" in column P (index 15) wins
     const aluno = idxs.some(i => (imersoesRows[i][15]||'').trim() === 'Aluno') ? 'Aluno' : 'Não é Aluno';
+    const abxVals = [...new Set(idxs.map(i => (imersoesRows[i][16]||'').trim()).filter(Boolean))];
+    const abx = abxVals.length ? abxVals.join('|') : 'Sem ABX';
     return [
       nome, emailRaw, phoneRaw, turmasCompra.join('|'), compra, qtd, aoVivoArr,
       pesquisa?pesquisa.sexo:'', pesquisa?pesquisa.idade:'',
       pesquisa?pesquisa.renda:'', pesquisa?pesquisa.patrimonio:'', pesquisa?pesquisa.arrematou:'',
-      aluno
+      aluno, abx
     ];
   });
 
-  return { turmasAoVivo, leads };
+  // Parallel leads: Arrematou ABX (deduped by email/phone) > Não Pagou Boleto (excl. matches) > Lance não Vencedor (excl. matches)
+  const parallel = [];
+  if (abxCsv) {
+    const abxRowsNamed = parseCSV(abxCsv).slice(1).filter(r => (r[16]||'').trim());
+    const keyToGroupIdxA = {};
+    const groupListA = [];
+    abxRowsNamed.forEach((r,i)=>{
+      const email = normEmail(r[18])||normEmail(r[19])||normEmail(r[20]);
+      const phone = normPhone(r[23])||normPhone(r[0]);
+      let gidx=null;
+      if(email && keyToGroupIdxA['e:'+email]!==undefined) gidx = keyToGroupIdxA['e:'+email];
+      else if(phone && keyToGroupIdxA['p:'+phone]!==undefined) gidx = keyToGroupIdxA['p:'+phone];
+      if(gidx===null){ gidx = groupListA.length; groupListA.push({rows:[]}); }
+      if(email) keyToGroupIdxA['e:'+email]=gidx;
+      if(phone) keyToGroupIdxA['p:'+phone]=gidx;
+      groupListA[gidx].rows.push(i);
+    });
+    groupListA.forEach(g=>{
+      const r = abxRowsNamed[g.rows[0]];
+      const nome = normVal(r[16]);
+      const email = normVal(r[18])||normVal(r[19])||normVal(r[20]);
+      const telefone = normVal(r[23])||normVal(r[0]);
+      const status = normVal(r[30]);
+      const aluno = normalizeAlunoLabel(r[27]);
+      parallel.push([nome, email, telefone, "Arrematou ABX", status, aluno]);
+    });
+  }
+  if (naopagouCsv) {
+    parseCSV(naopagouCsv).slice(1).forEach(r=>{
+      const nome = normVal(r[3]); if(!nome) return;
+      if (normVal(r[20]) === "Arm - ABX") return;
+      const email = normVal(r[8])||normVal(r[9])||normVal(r[10]);
+      const telefone = normVal(r[6])||normVal(r[4])||normVal(r[5])||normVal(r[7]);
+      const status = normVal(r[19]);
+      const aluno = normalizeAlunoLabel(r[0]);
+      parallel.push([nome, email, telefone, "Não Pagou Boleto", status, aluno]);
+    });
+  }
+  if (lanceCsv) {
+    parseCSV(lanceCsv).slice(1).forEach(r=>{
+      const nome = normVal(r[8]); if(!nome) return;
+      if (normVal(r[29]) !== "Reclassificação") return;
+      const email = normVal(r[10]);
+      const telefone = normVal(r[9]);
+      const status = normVal(r[27]);
+      const aluno = normalizeAlunoLabel(r[0]);
+      parallel.push([nome, email, telefone, "Lance não Vencedor", status, aluno]);
+    });
+  }
+
+  return { turmasAoVivo, leads, parallel };
 }
 
 const state = {
-  turmaCompra: "ALL",
-  turmaAoVivo: "ALL",
-  aluno: "ALL",
-  sexo: new Set(),
-  renda: new Set(),
-  patrimonio: new Set(),
-  arrematou: new Set()
+  turmaCompra: "ALL", turmaAoVivo: "ALL", aluno: "ALL",
+  sexo: new Set(), renda: new Set(), patrimonio: new Set(), arrematou: new Set(), abx: new Set()
 };
+const paraState = { segmento: "ALL", aluno: "ALL" };
 
-function uniqueSorted(idx){
-  const set = new Set();
-  DATA.forEach(r => { if(r[idx]) set.add(r[idx]); });
-  return [...set].sort();
-}
-
-function buildMultiSelect(id, idx, label){
-  const el = document.getElementById(id);
-  const values = uniqueSorted(idx);
-  const selSet = state[label];
-
-  function updateSummary(){
-    const count = selSet.size;
-    summaryCount.textContent = count === 0 ? "Todos" : count + " selecionado" + (count>1?"s":"");
-  }
-
-  el.innerHTML = "";
-  const summary = document.createElement("summary");
-  const summaryLabel = document.createElement("span");
-  summaryLabel.textContent = "Selecionar";
-  const summaryCount = document.createElement("span");
-  summaryCount.className = "msel-count";
-  const chev = document.createElement("span");
-  chev.className = "chev"; chev.textContent = "▾";
-  summary.appendChild(summaryLabel);
-  const right = document.createElement("span");
-  right.style.display = "flex"; right.style.alignItems="center";
-  right.appendChild(summaryCount); right.appendChild(chev);
-  summary.appendChild(right);
-  el.appendChild(summary);
-
-  const body = document.createElement("div");
-  body.className = "msel-body";
-
-  const actions = document.createElement("div");
-  actions.className = "msel-actions";
-  const btnAll = document.createElement("button"); btnAll.textContent = "Todos";
-  const btnNone = document.createElement("button"); btnNone.textContent = "Nenhum";
-  actions.appendChild(btnAll); actions.appendChild(btnNone);
-  body.appendChild(actions);
-
-  function makeOption(value, text, isNone){
-    const l = document.createElement("label");
-    l.className = "msel-opt" + (isNone ? " none-opt" : "");
-    const cb = document.createElement("input");
-    cb.type = "checkbox"; cb.value = value;
-    cb.checked = selSet.has(value);
-    cb.addEventListener("change", ()=>{
-      if(cb.checked) selSet.add(value); else selSet.delete(value);
-      updateSummary();
-      render();
-    });
-    const span = document.createElement("span");
-    span.textContent = text;
-    l.appendChild(cb); l.appendChild(span);
-    body.appendChild(l);
-    return cb;
-  }
-
-  const checkboxes = values.map(v => makeOption(v, v, false));
-  const noneCb = makeOption("__NONE__", "Sem parâmetro", true);
-
-  btnAll.addEventListener("click", (e)=>{
-    e.preventDefault();
-    values.forEach(v=>selSet.add(v));
-    selSet.add("__NONE__");
-    checkboxes.forEach(cb=>cb.checked=true);
-    noneCb.checked = true;
-    updateSummary(); render();
-  });
-  btnNone.addEventListener("click", (e)=>{
-    e.preventDefault();
-    selSet.clear();
-    checkboxes.forEach(cb=>cb.checked=false);
-    noneCb.checked = false;
-    updateSummary(); render();
-  });
-
-  el.appendChild(body);
-  updateSummary();
-}
-
-function buildLotsCompra(){
-  const container = document.getElementById("lotsCompra");
-  container.innerHTML = "";
-  const allLot = document.createElement("button");
-  allLot.className = "lot all-lot active";
-  allLot.dataset.turma = "ALL";
-  allLot.innerHTML = `<div class="lot-tag">Todas</div><div class="lot-name">Geral</div><div class="lot-count">${DATA.length} leads</div>`;
-  container.appendChild(allLot);
-
-  ALL_TURMAS.forEach(t=>{
-    const count = DATA.filter(r=>r[IDX.turmas].split("|").includes(t)).length;
-    const btn = document.createElement("button");
-    btn.className = "lot";
-    btn.dataset.turma = t;
-    btn.innerHTML = `<div class="lot-tag">Lote</div><div class="lot-name">${t}</div><div class="lot-count">${count}</div>`;
-    container.appendChild(btn);
-  });
-
-  container.querySelectorAll(".lot").forEach(lot=>{
-    lot.addEventListener("click", ()=>{
-      container.querySelectorAll(".lot").forEach(l=>l.classList.remove("active"));
-      lot.classList.add("active");
-      state.turmaCompra = lot.dataset.turma;
-      render();
-    });
-  });
-}
-
-function buildLotsAoVivo(){
-  const container = document.getElementById("lotsAoVivo");
-  container.innerHTML = "";
-  const allLot = document.createElement("button");
-  allLot.className = "lot all-lot active";
-  allLot.dataset.turma = "ALL";
-  allLot.innerHTML = `<div class="lot-tag">Qualquer</div><div class="lot-name">Todas</div><div class="lot-count">máx. entre lives</div>`;
-  container.appendChild(allLot);
-
-  ALL_TURMAS.forEach(t=>{
-    const hasData = TURMAS_AO_VIVO.includes(t);
-    const btn = document.createElement("button");
-    btn.className = "lot" + (hasData ? "" : " disabled");
-    btn.dataset.turma = t;
-    btn.innerHTML = `<div class="lot-tag">Live</div><div class="lot-name">${t}</div><div class="lot-count">${hasData ? "com dados" : "sem dados"}</div>`;
-    container.appendChild(btn);
-  });
-
-  container.querySelectorAll(".lot").forEach(lot=>{
-    lot.addEventListener("click", ()=>{
-      if(lot.classList.contains("disabled")) return;
-      container.querySelectorAll(".lot").forEach(l=>l.classList.remove("active"));
-      lot.classList.add("active");
-      state.turmaAoVivo = lot.dataset.turma;
-      render();
-    });
-  });
-}
-
-function buildLotsAluno(){
-  const container = document.getElementById("lotsAluno");
-  container.innerHTML = "";
-  const options = [
-    {v:"ALL", tag:"Todos", name:"Geral"},
-    {v:"Aluno", tag:"Status", name:"Aluno"},
-    {v:"Não é Aluno", tag:"Status", name:"Não Aluno"}
-  ];
-  options.forEach(o=>{
-    const count = o.v === "ALL" ? DATA.length : DATA.filter(r=>r[IDX.aluno]===o.v).length;
-    const btn = document.createElement("button");
-    btn.className = "lot" + (o.v==="ALL" ? " all-lot active" : "");
-    btn.dataset.aluno = o.v;
-    btn.innerHTML = `<div class="lot-tag">${o.tag}</div><div class="lot-name">${o.name}</div><div class="lot-count">${count}</div>`;
-    container.appendChild(btn);
-  });
-  container.querySelectorAll(".lot").forEach(lot=>{
-    lot.addEventListener("click", ()=>{
-      container.querySelectorAll(".lot").forEach(l=>l.classList.remove("active"));
-      lot.classList.add("active");
-      state.aluno = lot.dataset.aluno;
-      render();
-    });
-  });
-}
+function uniqueSorted(idx){ const s=new Set(); DATA.forEach(r=>{ if(r[idx]) s.add(r[idx]); }); return [...s].sort(); }
+function uniqueSortedPipe(idx){ const s=new Set(); DATA.forEach(r=>{ (r[idx]||'').split("|").filter(Boolean).forEach(v=>s.add(v)); }); return [...s].sort(); }
 
 function getPresencaEDuracao(row, turmaAoVivoFilter){
   const arr = row[IDX.aovivo];
   if(turmaAoVivoFilter === "ALL"){
-    let presente = false, dur = 0;
-    arr.forEach(([p,d])=>{ if(p){ presente = true; dur = Math.max(dur, d); } });
+    let presente=false, dur=0;
+    arr.forEach(([p,d])=>{ if(p){presente=true; dur=Math.max(dur,d);} });
     return {presente, dur};
   }
   const idx = TURMAS_AO_VIVO.indexOf(turmaAoVivoFilter);
-  if(idx === -1) return {presente:false, dur:0};
+  if(idx===-1) return {presente:false, dur:0};
   const pair = arr[idx] || [0,0];
-  return {presente: !!pair[0], dur: pair[1]};
+  return {presente:!!pair[0], dur:pair[1]};
 }
+function categoriaParticipacao(presente, dur){ if(!presente) return "Não entrou"; if(dur>90) return "Entrou grande parte"; return "Entrou pouco"; }
 
-function categoriaParticipacao(presente, dur){
-  if(!presente) return "Não entrou";
-  if(dur > 90) return "Entrou grande parte";
-  return "Entrou pouco";
-}
-
-function matchesMulti(row, idx, selSet){
-  if(selSet.size === 0) return true;
-  const val = row[idx];
-  if(!val) return selSet.has("__NONE__");
-  return selSet.has(val);
-}
+function matchesMulti(row, idx, selSet){ if(selSet.size===0) return true; const v=row[idx]; if(!v) return selSet.has("__NONE__"); return selSet.has(v); }
+function matchesMultiPipe(row, idx, selSet){ if(selSet.size===0) return true; const parts=(row[idx]||'').split("|").filter(Boolean); if(parts.length===0) return selSet.has("__NONE__"); return parts.some(p=>selSet.has(p)); }
 
 function filteredData(){
   return DATA.filter(r=>{
-    if(state.turmaCompra !== "ALL" && !r[IDX.turmas].split("|").includes(state.turmaCompra)) return false;
-    if(state.aluno !== "ALL" && r[IDX.aluno] !== state.aluno) return false;
+    if(state.turmaCompra!=="ALL" && !r[IDX.turmas].split("|").includes(state.turmaCompra)) return false;
+    if(state.aluno!=="ALL" && r[IDX.aluno]!==state.aluno) return false;
     if(!matchesMulti(r, IDX.sexo, state.sexo)) return false;
     if(!matchesMulti(r, IDX.renda, state.renda)) return false;
     if(!matchesMulti(r, IDX.patrimonio, state.patrimonio)) return false;
     if(!matchesMulti(r, IDX.arrematou, state.arrematou)) return false;
+    if(!matchesMultiPipe(r, IDX.abx, state.abx)) return false;
+    return true;
+  });
+}
+function filteredParallelData(){
+  return PARALLEL_DATA.filter(r=>{
+    if(paraState.segmento!=="ALL" && r[PIDX.segmento]!==paraState.segmento) return false;
+    if(paraState.aluno!=="ALL" && r[PIDX.aluno]!==paraState.aluno) return false;
     return true;
   });
 }
 
-function partBadgeClass(p){
-  if(p === "Entrou grande parte") return "entrou-grande";
-  if(p === "Entrou pouco") return "entrou-pouco";
-  return "nao-entrou";
+function partBadgeClass(p){ if(p==="Entrou grande parte") return "entrou-grande"; if(p==="Entrou pouco") return "entrou-pouco"; return "nao-entrou"; }
+function compraBadgeClass(c){ return c==="2x ou mais" ? "compra2":"compra1"; }
+function csvEscape(v){ v=(v===undefined||v===null)?"":String(v); if(/[",;\n]/.test(v)) return '"'+v.replace(/"/g,'""')+'"'; return v; }
+function downloadCsv(lines, filenamePrefix){
+  const csv="\uFEFF"+lines.join("\r\n");
+  const blob=new Blob([csv],{type:"text/csv;charset=utf-8;"});
+  const url=URL.createObjectURL(blob);
+  const a=document.createElement("a");
+  const ts=new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
+  a.href=url; a.download=`${filenamePrefix}_${ts}.csv`;
+  document.body.appendChild(a); a.click(); a.remove(); URL.revokeObjectURL(url);
 }
-function compraBadgeClass(c){ return c === "2x ou mais" ? "compra2" : "compra1"; }
 
 let lastFilteredWithPart = [];
 
+/* ============ DROPDOWN FILTER BAR ============ */
+function closeAllDropdowns(except){
+  document.querySelectorAll('.dd.open').forEach(d=>{ if(d!==except) d.classList.remove('open'); });
+}
+document.addEventListener('click', (e)=>{
+  if(!e.target.closest('.dd')) closeAllDropdowns();
+});
+
+function makeDropdown(id, labelText){
+  const dd = document.createElement('div');
+  dd.className = 'dd'; dd.id = id;
+  const toggle = document.createElement('button');
+  toggle.className = 'dd-toggle';
+  toggle.innerHTML = `<span class="dd-label">${labelText}</span><span class="dd-value">Todos</span><span class="chev">▾</span>`;
+  const panel = document.createElement('div');
+  panel.className = 'dd-panel';
+  toggle.addEventListener('click', (e)=>{
+    e.stopPropagation();
+    const willOpen = !dd.classList.contains('open');
+    closeAllDropdowns();
+    if(willOpen) dd.classList.add('open');
+  });
+  dd.appendChild(toggle); dd.appendChild(panel);
+  return {dd, toggle, panel};
+}
+
+function buildSingleSelectDropdown(container, id, labelText, options, getActiveValue, onSelect){
+  // options: [{value, name, count, disabled}]
+  const {dd, toggle, panel} = makeDropdown(id, labelText);
+  function renderPanel(){
+    panel.innerHTML = '';
+    const lots = document.createElement('div'); lots.className='lots';
+    options.forEach(o=>{
+      const btn = document.createElement('button');
+      btn.className = 'lot' + (o.value==="ALL" ? ' all-span':'') + (getActiveValue()===o.value ? ' active':'') + (o.disabled ? ' disabled':'');
+      btn.innerHTML = `<div>${o.name}</div><div class="lot-count">${o.count}</div>`;
+      if(!o.disabled){
+        btn.addEventListener('click', ()=>{
+          onSelect(o.value);
+          updateToggleLabel();
+          renderPanel();
+          dd.classList.remove('open');
+        });
+      }
+      lots.appendChild(btn);
+    });
+    panel.appendChild(lots);
+  }
+  function updateToggleLabel(){
+    const active = options.find(o=>o.value===getActiveValue());
+    toggle.querySelector('.dd-value').textContent = active ? active.name : 'Todos';
+  }
+  renderPanel(); updateToggleLabel();
+  container.appendChild(dd);
+  return {renderPanel, updateToggleLabel};
+}
+
+function buildMultiSelectDropdown(container, id, labelText, idx, selSet, pipe){
+  const {dd, toggle, panel} = makeDropdown(id, labelText);
+  function values(){ return pipe ? uniqueSortedPipe(idx) : uniqueSorted(idx); }
+  function renderPanel(){
+    panel.innerHTML = '';
+    const actions = document.createElement('div'); actions.className='msel-actions';
+    const btnAll = document.createElement('button'); btnAll.textContent='Todos';
+    const btnNone = document.createElement('button'); btnNone.textContent='Nenhum';
+    actions.appendChild(btnAll); actions.appendChild(btnNone);
+    panel.appendChild(actions);
+    const list = document.createElement('div'); list.className='msel-list';
+    const vals = values();
+    const checkboxes = [];
+    vals.forEach(v=>{
+      const l = document.createElement('label'); l.className='msel-opt';
+      const cb = document.createElement('input'); cb.type='checkbox'; cb.checked=selSet.has(v);
+      cb.addEventListener('change', ()=>{ if(cb.checked) selSet.add(v); else selSet.delete(v); updateToggleLabel(); render(); renderParalelo(); });
+      const span = document.createElement('span'); span.textContent=v;
+      l.appendChild(cb); l.appendChild(span); list.appendChild(l); checkboxes.push(cb);
+    });
+    const noneL = document.createElement('label'); noneL.className='msel-opt none-opt';
+    const noneCb = document.createElement('input'); noneCb.type='checkbox'; noneCb.checked=selSet.has('__NONE__');
+    noneCb.addEventListener('change', ()=>{ if(noneCb.checked) selSet.add('__NONE__'); else selSet.delete('__NONE__'); updateToggleLabel(); render(); });
+    const noneSpan = document.createElement('span'); noneSpan.textContent='Sem parâmetro';
+    noneL.appendChild(noneCb); noneL.appendChild(noneSpan); list.appendChild(noneL);
+    panel.appendChild(list);
+    btnAll.addEventListener('click', (e)=>{ e.preventDefault(); vals.forEach(v=>selSet.add(v)); selSet.add('__NONE__'); checkboxes.forEach(cb=>cb.checked=true); noneCb.checked=true; updateToggleLabel(); render(); renderParalelo(); });
+    btnNone.addEventListener('click', (e)=>{ e.preventDefault(); selSet.clear(); checkboxes.forEach(cb=>cb.checked=false); noneCb.checked=false; updateToggleLabel(); render(); renderParalelo(); });
+  }
+  function updateToggleLabel(){
+    const c = selSet.size;
+    toggle.querySelector('.dd-value').textContent = c===0 ? 'Todos' : (c + ' selecionado' + (c>1?'s':''));
+  }
+  renderPanel(); updateToggleLabel();
+  container.appendChild(dd);
+  return {renderPanel, updateToggleLabel};
+}
+
+let ddRefs = {};
+function buildFilterBar(){
+  const bar = document.getElementById('filterBar');
+  bar.innerHTML = '';
+
+  const turmaOptions = [{value:"ALL", name:"Geral", count:DATA.length}].concat(
+    ALL_TURMAS.map(t=>({value:t, name:t, count: DATA.filter(r=>r[IDX.turmas].split("|").includes(t)).length}))
+  );
+  ddRefs.turmaCompra = buildSingleSelectDropdown(bar, 'ddTurmaCompra', 'Turma Compra', turmaOptions, ()=>state.turmaCompra, (v)=>{ state.turmaCompra=v; render(); });
+
+  const aoVivoOptions = [{value:"ALL", name:"Qualquer live", count: DATA.length}].concat(
+    ALL_TURMAS.map(t=>({value:t, name:t, count:0, disabled: !TURMAS_AO_VIVO.includes(t)}))
+  );
+  ddRefs.turmaAoVivo = buildSingleSelectDropdown(bar, 'ddTurmaAoVivo', 'Turma Ao Vivo', aoVivoOptions, ()=>state.turmaAoVivo, (v)=>{ state.turmaAoVivo=v; render(); });
+
+  const alunoOptions = [
+    {value:"ALL", name:"Geral", count:DATA.length},
+    {value:"Aluno", name:"Aluno", count: DATA.filter(r=>r[IDX.aluno]==="Aluno").length},
+    {value:"Não é Aluno", name:"Não Aluno", count: DATA.filter(r=>r[IDX.aluno]!=="Aluno").length}
+  ];
+  ddRefs.aluno = buildSingleSelectDropdown(bar, 'ddAluno', 'Status Aluno', alunoOptions, ()=>state.aluno, (v)=>{ state.aluno=v; render(); });
+
+  ddRefs.abx = buildMultiSelectDropdown(bar, 'ddAbx', 'Utilizou ABX', IDX.abx, state.abx, true);
+  ddRefs.sexo = buildMultiSelectDropdown(bar, 'ddSexo', 'Sexo', IDX.sexo, state.sexo, false);
+  ddRefs.renda = buildMultiSelectDropdown(bar, 'ddRenda', 'Renda', IDX.renda, state.renda, false);
+  ddRefs.patrimonio = buildMultiSelectDropdown(bar, 'ddPatrimonio', 'Patrimônio', IDX.patrimonio, state.patrimonio, false);
+  ddRefs.arrematou = buildMultiSelectDropdown(bar, 'ddArrematou', 'Arrematou', IDX.arrematou, state.arrematou, false);
+}
+
+function refreshFilterBar(){
+  buildFilterBar();
+}
+
+/* ============ CHARTS (inline SVG, no deps) ============ */
+function barChartHtml(rows, opts){
+  // rows: [{label, value, colorClass or color}]
+  opts = opts || {};
+  const max = Math.max(1, ...rows.map(r=>r.value));
+  return rows.map(r=>{
+    const pct = Math.round((r.value/max)*100);
+    const cls = r.colorClass || 'bar-fill-solid';
+    const color = r.color ? `style="width:${pct}%;background:${r.color}"` : `style="width:${pct}%"`;
+    return `<div class="bar-row">
+      <div class="bar-label">${r.label}</div>
+      <div class="bar-track"><div class="bar-fill ${cls}" ${color}></div></div>
+      <div class="bar-value">${r.value.toLocaleString('pt-BR')}</div>
+    </div>`;
+  }).join('');
+}
+
+function stackedBarHtml(rows){
+  // rows: [{label, aluno, naoAluno}]
+  return rows.map(r=>{
+    const total = r.aluno + r.naoAluno;
+    const pctA = total ? Math.round((r.aluno/total)*100) : 0;
+    const pctN = total ? 100-pctA : 0;
+    return `<div class="bar-row">
+      <div class="bar-label">${r.label}</div>
+      <div class="bar-track">
+        <div class="bar-fill aluno" style="width:${pctA}%"></div>
+        <div class="bar-fill naoaluno" style="width:${pctN}%"></div>
+      </div>
+      <div class="bar-value">${r.aluno}/${total}</div>
+    </div>`;
+  }).join('') + `<div class="legend-row">
+      <span><span class="legend-dot" style="background:var(--green)"></span>Aluno</span>
+      <span><span class="legend-dot" style="background:#E2DFD6"></span>Não Aluno</span>
+    </div>`;
+}
+
+function donutSvg(segments, size){
+  // segments: [{label, value, color}]
+  size = size || 150;
+  const r = size/2 - 14;
+  const cx = size/2, cy = size/2;
+  const circumference = 2*Math.PI*r;
+  const total = segments.reduce((s,x)=>s+x.value,0) || 1;
+  let offset = 0;
+  const circles = segments.map(seg=>{
+    const frac = seg.value/total;
+    const dash = frac*circumference;
+    const gap = circumference - dash;
+    const el = `<circle cx="${cx}" cy="${cy}" r="${r}" fill="none" stroke="${seg.color}" stroke-width="20"
+      stroke-dasharray="${dash} ${gap}" stroke-dashoffset="${-offset}" transform="rotate(-90 ${cx} ${cy})"/>`;
+    offset += dash;
+    return el;
+  }).join('');
+  return `<svg width="${size}" height="${size}" viewBox="0 0 ${size} ${size}">${circles}
+    <circle cx="${cx}" cy="${cy}" r="${r-11}" fill="var(--card-bg,#fff)"/>
+    <text x="${cx}" y="${cy-2}" text-anchor="middle" font-family="Fraunces, serif" font-size="20" font-weight="700" fill="var(--text-dark,#1B2436)">${total.toLocaleString('pt-BR')}</text>
+    <text x="${cx}" y="${cy+16}" text-anchor="middle" font-family="IBM Plex Mono, monospace" font-size="9" fill="var(--text-mid,#5B6478)">total</text>
+  </svg>`;
+}
+
+function donutWithLegend(segments, size){
+  const legend = segments.map(s=>`<div class="item"><span class="swatch" style="background:${s.color}"></span><span class="lname">${s.label}</span><span class="lval">${s.value}</span></div>`).join('');
+  return `<div class="donut-wrap">${donutSvg(segments,size)}<div class="donut-legend">${legend}</div></div>`;
+}
+
+/* ============ DASHBOARD RENDER ============ */
+function renderDashboard(rows){
+  const withPart = rows.map(r=>{
+    const {presente,dur}=getPresencaEDuracao(r, state.turmaAoVivo);
+    return {r, dur, presente, part: categoriaParticipacao(presente,dur)};
+  });
+
+  const alunosImersao = rows.filter(r=>r[IDX.aluno]==="Aluno").length;
+  const naoAlunosImersao = rows.length - alunosImersao;
+  const paraRows = filteredParallelData();
+  const alunosPara = paraRows.filter(r=>r[PIDX.aluno]==="Aluno").length;
+  const naoAlunosPara = paraRows.length - alunosPara;
+  const totalGeral = rows.length + paraRows.length;
+  const totalAbordaveis = naoAlunosImersao + naoAlunosPara;
+
+  document.getElementById('kpiRow').innerHTML = `
+    <div class="kpi-card hero"><div class="num">${totalGeral.toLocaleString('pt-BR')}</div><div class="lbl">Total de leads (Imersão + Paralelo)</div></div>
+    <div class="kpi-card"><div class="num">${rows.length.toLocaleString('pt-BR')}</div><div class="lbl">Leads da Imersão (filtro atual)</div></div>
+    <div class="kpi-card"><div class="num">${paraRows.length.toLocaleString('pt-BR')}</div><div class="lbl">Leads paralelos ABX (filtro atual)</div></div>
+    <div class="kpi-card green"><div class="num">${(alunosImersao+alunosPara).toLocaleString('pt-BR')}</div><div class="lbl">Já são Alunos (Mentoria)</div></div>
+    <div class="kpi-card red"><div class="num">${totalAbordaveis.toLocaleString('pt-BR')}</div><div class="lbl">Ainda não são Alunos — abordáveis agora</div></div>
+  `;
+
+  // Chart: Aluno x Não Aluno por Fonte
+  const fonteRows = [
+    {label:"Imersão", aluno: alunosImersao, naoAluno: naoAlunosImersao},
+  ];
+  SEGMENTOS.forEach(seg=>{
+    const segRows = paraRows.filter(r=>r[PIDX.segmento]===seg);
+    fonteRows.push({label:seg, aluno: segRows.filter(r=>r[PIDX.aluno]==="Aluno").length, naoAluno: segRows.filter(r=>r[PIDX.aluno]!=="Aluno").length});
+  });
+  document.getElementById('chartFonte').innerHTML = stackedBarHtml(fonteRows);
+
+  // Donut: ABX status among Imersão leads
+  const abxCounts = {};
+  rows.forEach(r=>{
+    (r[IDX.abx]||'Sem ABX').split("|").filter(Boolean).forEach(v=>{ abxCounts[v]=(abxCounts[v]||0)+1; });
+  });
+  const abxColors = {"Arm ABX":"#2F7A4F","Sem ABX":"#C9CBC2","Reclassificação":"#B8842A","Arm - Não Pagou":"#B4462F"};
+  const abxSegs = Object.keys(abxCounts).map(k=>({label:k, value:abxCounts[k], color: abxColors[k] || '#6B3FA0'}));
+  document.getElementById('chartAbxDonut').innerHTML = donutWithLegend(abxSegs, 150);
+
+  // Bar: Participação
+  const partCounts = {"Não entrou":0,"Entrou pouco":0,"Entrou grande parte":0};
+  withPart.forEach(x=>{ partCounts[x.part]=(partCounts[x.part]||0)+1; });
+  document.getElementById('chartParticipacao').innerHTML = barChartHtml([
+    {label:"Não entrou", value:partCounts["Não entrou"], color:"#B4462F"},
+    {label:"Entrou pouco", value:partCounts["Entrou pouco"], color:"#B8842A"},
+    {label:"Entrou grande parte", value:partCounts["Entrou grande parte"], color:"#2F7A4F"}
+  ]);
+
+  // Bar: leads por turma
+  const turmaRows = ALL_TURMAS.map(t=>({label:t, value: rows.filter(r=>r[IDX.turmas].split("|").includes(t)).length, color:"#C9973D"}));
+  document.getElementById('chartTurmas').innerHTML = barChartHtml(turmaRows);
+}
+
+/* ============ MAIN TABLE RENDER ============ */
 function render(){
   const rows = filteredData();
   const withPart = rows.map(r=>{
-    const {presente, dur} = getPresencaEDuracao(r, state.turmaAoVivo);
-    return {r, dur, presente, part: categoriaParticipacao(presente, dur)};
+    const {presente,dur}=getPresencaEDuracao(r, state.turmaAoVivo);
+    return {r, dur, presente, part: categoriaParticipacao(presente,dur)};
   });
   lastFilteredWithPart = withPart;
 
-  document.getElementById("totalCount").textContent = rows.length.toLocaleString("pt-BR");
-  document.getElementById("scopeLabel").textContent = state.turmaCompra === "ALL" ? "Todas as turmas de compra" : ("Turma de compra " + state.turmaCompra);
-  document.getElementById("lensTag").textContent = state.turmaAoVivo === "ALL" ? "lente: qualquer live" : ("lente: live " + state.turmaAoVivo);
-
-  const partCounts = {"Não entrou":0,"Entrou pouco":0,"Entrou grande parte":0};
-  withPart.forEach(x=>{ partCounts[x.part] = (partCounts[x.part]||0)+1; });
-
-  const alunos = rows.filter(r=>r[IDX.aluno]==="Aluno");
-  const naoAlunos = rows.filter(r=>r[IDX.aluno]!=="Aluno");
-  const avgCompras = alunos.length ? (alunos.reduce((s,r)=>s+r[IDX.qtd],0) / alunos.length) : 0;
-
-  document.getElementById("statsRow").innerHTML = `
-    <div class="stat-card red"><div class="num">${partCounts["Não entrou"]}</div><div class="lbl">Não entrou</div></div>
-    <div class="stat-card amber"><div class="num">${partCounts["Entrou pouco"]}</div><div class="lbl">Entrou pouco</div></div>
-    <div class="stat-card green"><div class="num">${partCounts["Entrou grande parte"]}</div><div class="lbl">Entrou grande parte</div></div>
-    <div class="stat-card"><div class="num">${alunos.length}</div><div class="lbl">Alunos (Mentoria)</div></div>
-    <div class="stat-card"><div class="num">${naoAlunos.length}</div><div class="lbl">Ainda não são alunos — abordáveis</div></div>
-    <div class="metric-card"><div class="num">${avgCompras.toFixed(1)}x</div><div class="lbl">Média de imersões compradas pelos leads que viraram Aluno (neste recorte)</div></div>
-  `;
-
-  const compras = ["1x","2x ou mais"];
-  const parts = ["Não entrou","Entrou pouco","Entrou grande parte"];
-  let matrixHtml = "<tr><th>Compra \\ Participação</th>" + parts.map(p=>`<th>${p}</th>`).join("") + "<th>Total</th></tr>";
-  compras.forEach(c=>{
-    const subset = withPart.filter(x=>x.r[IDX.compra]===c);
-    let rowTotal = 0;
-    let cells = parts.map(p=>{
-      const n = subset.filter(x=>x.part===p).length;
-      rowTotal += n;
-      return `<td class="num">${n}</td>`;
-    }).join("");
-    matrixHtml += `<tr><td class="rowlabel">${c}</td>${cells}<td class="num">${rowTotal}</td></tr>`;
-  });
-  document.getElementById("matrixTable").innerHTML = matrixHtml;
-
-  document.getElementById("tableCount").textContent = rows.length.toLocaleString("pt-BR");
-  const body = document.getElementById("leadsBody");
+  document.getElementById('tableCount').textContent = rows.length.toLocaleString('pt-BR');
+  const body = document.getElementById('leadsBody');
   const MAX_ROWS = 500;
   const shown = withPart.slice(0, MAX_ROWS);
   const val = (v)=> v ? v : '<span class="empty-val">sem parâmetro</span>';
   body.innerHTML = shown.map(({r,dur,part,presente})=>{
     const nome=r[IDX.nome], email=r[IDX.email], telefone=r[IDX.telefone], turmasCompra=r[IDX.turmas], compra=r[IDX.compra];
-    const sexo=r[IDX.sexo], renda=r[IDX.renda], patrimonio=r[IDX.patrimonio], arrematou=r[IDX.arrematou], aluno=r[IDX.aluno];
+    const sexo=r[IDX.sexo], renda=r[IDX.renda], patrimonio=r[IDX.patrimonio], arrematou=r[IDX.arrematou], aluno=r[IDX.aluno], abx=r[IDX.abx];
     return `<tr>
       <td>${nome}</td>
       <td class="contact-col">${val(email)}</td>
       <td class="contact-col">${val(telefone)}</td>
       <td>${turmasCompra.split("|").join(", ")}</td>
       <td><span class="badge ${compraBadgeClass(compra)}">${compra}</span></td>
-      <td>${presente ? (dur > 0 ? dur + " min" : "conectou · tempo não identificado") : "—"}</td>
+      <td>${presente ? (dur>0 ? dur+" min" : "conectou · tempo não identificado") : "—"}</td>
       <td><span class="badge ${partBadgeClass(part)}">${part}</span></td>
       <td>${aluno==="Aluno" ? '<span class="badge entrou-grande">Aluno</span>' : '<span class="badge compra1">Não Aluno</span>'}</td>
+      <td>${val(abx.split("|").join(", "))}</td>
       <td>${val(sexo)}</td>
       <td>${val(renda)}</td>
       <td>${val(patrimonio)}</td>
@@ -692,71 +877,127 @@ function render(){
     </tr>`;
   }).join("");
   if(rows.length > MAX_ROWS){
-    body.innerHTML += `<tr><td colspan="12" class="count-pill">Mostrando ${MAX_ROWS} de ${rows.length} leads na tabela — a exportação CSV inclui todos os ${rows.length}.</td></tr>`;
+    body.innerHTML += `<tr><td colspan="13" class="count-pill">Mostrando ${MAX_ROWS} de ${rows.length} — a exportação CSV inclui todos.</td></tr>`;
   }
-}
 
-function csvEscape(v){
-  v = (v===undefined||v===null) ? "" : String(v);
-  if(/[",;\n]/.test(v)) return '"' + v.replace(/"/g,'""') + '"';
-  return v;
+  renderDashboard(rows);
 }
 
 function exportCsv(){
-  const headers = ["Nome","Email","Telefone","Turma(s) Compra","Compra","Qtd Compras","Duração (lente)","Participação","Status Aluno","Sexo","Idade","Renda","Patrimônio","Arrematou"];
+  const headers = ["Nome","Email","Telefone","Turma(s) Compra","Compra","Qtd Compras","Duração (lente)","Participação","Status Aluno","Utilizou ABX","Sexo","Idade","Renda","Patrimônio","Arrematou"];
   const lines = [headers.map(csvEscape).join(";")];
   lastFilteredWithPart.forEach(({r,dur,part,presente})=>{
     const durText = presente ? (dur>0 ? dur : "conectou (tempo não identificado)") : "";
-    const row = [
-      r[IDX.nome], r[IDX.email], r[IDX.telefone], r[IDX.turmas].split("|").join(", "),
-      r[IDX.compra], r[IDX.qtd], durText, part, r[IDX.aluno], r[IDX.sexo], r[IDX.idade], r[IDX.renda], r[IDX.patrimonio], r[IDX.arrematou]
-    ];
-    lines.push(row.map(csvEscape).join(";"));
+    lines.push([r[IDX.nome], r[IDX.email], r[IDX.telefone], r[IDX.turmas].split("|").join(", "),
+      r[IDX.compra], r[IDX.qtd], durText, part, r[IDX.aluno], r[IDX.abx].split("|").join(", "), r[IDX.sexo], r[IDX.idade], r[IDX.renda], r[IDX.patrimonio], r[IDX.arrematou]
+    ].map(csvEscape).join(";"));
   });
-  const csv = "\uFEFF" + lines.join("\r\n");
-  const blob = new Blob([csv], {type:"text/csv;charset=utf-8;"});
-  const url = URL.createObjectURL(blob);
-  const a = document.createElement("a");
-  const ts = new Date().toISOString().slice(0,16).replace(/[:T]/g,"-");
-  a.href = url;
-  a.download = `leads_painel_${ts}.csv`;
-  document.body.appendChild(a);
-  a.click();
-  a.remove();
-  URL.revokeObjectURL(url);
+  downloadCsv(lines, "leads_imersao");
 }
 
-function init(){
-  buildLotsCompra();
-  buildLotsAoVivo();
-  buildLotsAluno();
-  buildMultiSelect("msel-sexo", IDX.sexo, "sexo");
-  buildMultiSelect("msel-renda", IDX.renda, "renda");
-  buildMultiSelect("msel-patrimonio", IDX.patrimonio, "patrimonio");
-  buildMultiSelect("msel-arrematou", IDX.arrematou, "arrematou");
-
-  document.getElementById("toggleContact").addEventListener("change", (e)=>{
-    document.getElementById("leadsTable").classList.toggle("show-contact", e.target.checked);
+/* ============ PARALLEL SECTION ============ */
+function buildLotsSegmento(){
+  const container = document.getElementById('lotsSegmento');
+  container.innerHTML = '';
+  const allLot = document.createElement('button');
+  allLot.className='lot active'; allLot.dataset.segmento='ALL';
+  allLot.innerHTML = `Todos os segmentos<span class="lot-count-inline">${PARALLEL_DATA.length}</span>`;
+  container.appendChild(allLot);
+  SEGMENTOS.forEach(s=>{
+    const count = PARALLEL_DATA.filter(r=>r[PIDX.segmento]===s).length;
+    const btn = document.createElement('button');
+    btn.className='lot'; btn.dataset.segmento=s;
+    btn.innerHTML = `${s}<span class="lot-count-inline">${count}</span>`;
+    container.appendChild(btn);
   });
-  document.getElementById("exportBtn").addEventListener("click", exportCsv);
+  container.querySelectorAll('.lot').forEach(lot=>{
+    lot.addEventListener('click', ()=>{
+      container.querySelectorAll('.lot').forEach(l=>l.classList.remove('active'));
+      lot.classList.add('active');
+      paraState.segmento = lot.dataset.segmento;
+      buildLotsAlunoParalelo();
+      renderParalelo();
+    });
+  });
+}
+function buildLotsAlunoParalelo(){
+  const container = document.getElementById('lotsAlunoParalelo');
+  const prevActive = paraState.aluno;
+  container.innerHTML = '';
+  const source = paraState.segmento==="ALL" ? PARALLEL_DATA : PARALLEL_DATA.filter(r=>r[PIDX.segmento]===paraState.segmento);
+  const options = [
+    {v:"ALL", name:"Todos"},
+    {v:"Aluno", name:"Aluno"},
+    {v:"Não é Aluno", name:"Não Aluno"}
+  ];
+  options.forEach(o=>{
+    const count = o.v==="ALL" ? source.length : source.filter(r=>r[PIDX.aluno]===o.v).length;
+    const btn = document.createElement('button');
+    btn.className='lot'+(o.v===prevActive?' active':'');
+    btn.dataset.aluno=o.v;
+    btn.innerHTML = `${o.name}<span class="lot-count-inline">${count}</span>`;
+    container.appendChild(btn);
+  });
+  container.querySelectorAll('.lot').forEach(lot=>{
+    lot.addEventListener('click', ()=>{
+      container.querySelectorAll('.lot').forEach(l=>l.classList.remove('active'));
+      lot.classList.add('active');
+      paraState.aluno = lot.dataset.aluno;
+      renderParalelo();
+    });
+  });
+}
+function renderParalelo(){
+  const rows = filteredParallelData();
+  document.getElementById('paraTableCount').textContent = rows.length.toLocaleString('pt-BR');
+  const body = document.getElementById('paraLeadsBody');
+  const MAX_ROWS = 500;
+  const shown = rows.slice(0, MAX_ROWS);
+  const val = (v)=> v ? v : '<span class="empty-val">sem informação</span>';
+  body.innerHTML = shown.map(r=>`<tr>
+    <td>${val(r[PIDX.nome])}</td>
+    <td class="contact-col">${val(r[PIDX.email])}</td>
+    <td class="contact-col">${val(r[PIDX.telefone])}</td>
+    <td>${val(r[PIDX.segmento])}</td>
+    <td>${val(r[PIDX.status])}</td>
+    <td>${r[PIDX.aluno]==="Aluno" ? '<span class="badge entrou-grande">Aluno</span>' : '<span class="badge compra1">Não Aluno</span>'}</td>
+  </tr>`).join("");
+  if(rows.length > MAX_ROWS){
+    body.innerHTML += `<tr><td colspan="6" class="count-pill">Mostrando ${MAX_ROWS} de ${rows.length}.</td></tr>`;
+  }
+}
+function exportCsvParalelo(){
+  const headers = ["Nome","Email","Telefone","Segmento","Status","Status Aluno"];
+  const lines = [headers.map(csvEscape).join(";")];
+  filteredParallelData().forEach(r=> lines.push(r.map(csvEscape).join(";")));
+  downloadCsv(lines, "leads_paralelos");
+}
 
-  document.getElementById("resetBtn").addEventListener("click", ()=>{
+/* ============ INIT ============ */
+function init(){
+  buildFilterBar();
+  buildLotsSegmento();
+  buildLotsAlunoParalelo();
+
+  document.getElementById('toggleContact').addEventListener('change', (e)=>{
+    document.getElementById('leadsTable').classList.toggle('show-contact', e.target.checked);
+    document.getElementById('paraLeadsTable').classList.toggle('show-contact', e.target.checked);
+  });
+  document.getElementById('exportBtn').addEventListener('click', exportCsv);
+  document.getElementById('exportParaBtn').addEventListener('click', exportCsvParalelo);
+  document.getElementById('resetBtn').addEventListener('click', ()=>{
     state.turmaCompra="ALL"; state.turmaAoVivo="ALL"; state.aluno="ALL";
-    state.sexo.clear(); state.renda.clear(); state.patrimonio.clear(); state.arrematou.clear();
-    document.querySelectorAll("#lotsCompra .lot").forEach(l=>l.classList.remove("active"));
-    document.querySelector('#lotsCompra .lot[data-turma="ALL"]').classList.add("active");
-    document.querySelectorAll("#lotsAoVivo .lot").forEach(l=>l.classList.remove("active"));
-    document.querySelector('#lotsAoVivo .lot[data-turma="ALL"]').classList.add("active");
-    document.querySelectorAll("#lotsAluno .lot").forEach(l=>l.classList.remove("active"));
-    document.querySelector('#lotsAluno .lot[data-aluno="ALL"]').classList.add("active");
-    buildMultiSelect("msel-sexo", IDX.sexo, "sexo");
-    buildMultiSelect("msel-renda", IDX.renda, "renda");
-    buildMultiSelect("msel-patrimonio", IDX.patrimonio, "patrimonio");
-    buildMultiSelect("msel-arrematou", IDX.arrematou, "arrematou");
+    state.sexo.clear(); state.renda.clear(); state.patrimonio.clear(); state.arrematou.clear(); state.abx.clear();
+    paraState.segmento="ALL"; paraState.aluno="ALL";
+    buildFilterBar();
+    buildLotsSegmento();
+    buildLotsAlunoParalelo();
     render();
+    renderParalelo();
   });
 
   render();
+  renderParalelo();
 }
 
 function setStatus(kind, text){
@@ -767,17 +1008,16 @@ function setStatus(kind, text){
 }
 
 function showErrorBanner(message){
-  const main = document.querySelector(".main");
+  const dash = document.getElementById("dashboard");
   let banner = document.getElementById("errorBanner");
   if(!banner){
     banner = document.createElement("div");
     banner.id = "errorBanner";
     banner.className = "error-banner";
-    main.insertBefore(banner, main.firstChild);
+    dash.insertBefore(banner, dash.firstChild);
   }
   banner.innerHTML = message;
 }
-
 function clearErrorBanner(){
   const banner = document.getElementById("errorBanner");
   if(banner) banner.remove();
@@ -792,21 +1032,23 @@ async function loadData(){
     const result = await fetchAndProcess();
     TURMAS_AO_VIVO = result.turmasAoVivo;
     DATA = result.leads;
+    PARALLEL_DATA = result.parallel;
     clearErrorBanner();
     const now = new Date();
     setStatus("ok", "Atualizado às " + now.toLocaleTimeString("pt-BR", {hour:"2-digit", minute:"2-digit"}));
     if(firstLoad){ init(); firstLoad = false; }
     else {
       const prevCompra = state.turmaCompra, prevAoVivo = state.turmaAoVivo, prevAluno = state.aluno;
-      buildLotsCompra(); buildLotsAoVivo(); buildLotsAluno();
-      document.querySelectorAll("#lotsCompra .lot").forEach(l=>l.classList.toggle("active", l.dataset.turma===prevCompra));
-      document.querySelectorAll("#lotsAoVivo .lot").forEach(l=>l.classList.toggle("active", l.dataset.turma===prevAoVivo));
-      document.querySelectorAll("#lotsAluno .lot").forEach(l=>l.classList.toggle("active", l.dataset.aluno===prevAluno));
-      buildMultiSelect("msel-sexo", IDX.sexo, "sexo");
-      buildMultiSelect("msel-renda", IDX.renda, "renda");
-      buildMultiSelect("msel-patrimonio", IDX.patrimonio, "patrimonio");
-      buildMultiSelect("msel-arrematou", IDX.arrematou, "arrematou");
+      const prevSegmento = paraState.segmento, prevParaAluno = paraState.aluno;
+      buildFilterBar();
+      paraState.segmento = prevSegmento; paraState.aluno = prevParaAluno;
+      buildLotsSegmento();
+      buildLotsAlunoParalelo();
+      document.querySelectorAll("#lotsSegmento .lot").forEach(l=>l.classList.toggle("active", l.dataset.segmento===prevSegmento));
+      document.querySelectorAll("#lotsAlunoParalelo .lot").forEach(l=>l.classList.toggle("active", l.dataset.aluno===prevParaAluno));
+      state.turmaCompra = prevCompra; state.turmaAoVivo = prevAoVivo; state.aluno = prevAluno;
       render();
+      renderParalelo();
     }
   } catch(err){
     setStatus("err", "Falha ao buscar dados (" + err.message + ")");
@@ -815,7 +1057,7 @@ async function loadData(){
       "Isso normalmente acontece quando a planilha não está compartilhada como \"Qualquer pessoa com o link\" (modo leitor). " +
       "Abra a planilha no Google Sheets, clique em <b>Compartilhar</b> e mude o acesso geral para \"Qualquer pessoa com o link — Leitor\", depois clique em Atualizar agora."
     );
-    if(firstLoad){ DATA = []; TURMAS_AO_VIVO = []; init(); firstLoad = false; }
+    if(firstLoad){ DATA = []; PARALLEL_DATA = []; TURMAS_AO_VIVO = []; init(); firstLoad = false; }
   } finally {
     btn.disabled = false;
   }
