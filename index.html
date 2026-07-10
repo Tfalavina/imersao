@@ -331,6 +331,7 @@
               <th class="contact-col">Telefone</th>
               <th>Segmento</th>
               <th>Status</th>
+              <th>Data Arrematação</th>
               <th>Aluno?</th>
             </tr>
           </thead>
@@ -357,7 +358,7 @@ let TURMAS_AO_VIVO = [];
 let DATA = [];
 let PARALLEL_DATA = [];
 const IDX = {nome:0, email:1, telefone:2, turmas:3, compra:4, qtd:5, aovivo:6, sexo:7, idade:8, renda:9, patrimonio:10, arrematou:11, aluno:12, abx:13};
-const PIDX = {nome:0, email:1, telefone:2, segmento:3, status:4, aluno:5};
+const PIDX = {nome:0, email:1, telefone:2, segmento:3, status:4, aluno:5, data:6};
 const ALL_TURMAS = ["T17","T18","T19","T20","T21","T22"];
 const SEGMENTOS = ["Arrematou ABX","Não Pagou Boleto","Lance não Vencedor"];
 
@@ -503,7 +504,8 @@ async function fetchAndProcess(){
       const telefone = normVal(r[23])||normVal(r[0]);
       const status = normVal(r[30]);
       const aluno = normalizeAlunoLabel(r[27]);
-      parallel.push([nome, email, telefone, "Arrematou ABX", status, aluno]);
+      const data = normVal(r[4]);
+      parallel.push([nome, email, telefone, "Arrematou ABX", status, aluno, data]);
     });
   }
   if (naopagouCsv) {
@@ -514,7 +516,8 @@ async function fetchAndProcess(){
       const telefone = normVal(r[6])||normVal(r[4])||normVal(r[5])||normVal(r[7]);
       const status = normVal(r[19]);
       const aluno = normalizeAlunoLabel(r[0]);
-      parallel.push([nome, email, telefone, "Não Pagou Boleto", status, aluno]);
+      const data = normVal(r[13]);
+      parallel.push([nome, email, telefone, "Não Pagou Boleto", status, aluno, data]);
     });
   }
   if (lanceCsv) {
@@ -525,7 +528,8 @@ async function fetchAndProcess(){
       const telefone = normVal(r[9]);
       const status = normVal(r[27]);
       const aluno = normalizeAlunoLabel(r[0]);
-      parallel.push([nome, email, telefone, "Lance não Vencedor", status, aluno]);
+      const data = normVal(r[11]);
+      parallel.push([nome, email, telefone, "Lance não Vencedor", status, aluno, data]);
     });
   }
 
@@ -954,22 +958,24 @@ function renderParalelo(){
   const MAX_ROWS = 500;
   const shown = rows.slice(0, MAX_ROWS);
   const val = (v)=> v ? v : '<span class="empty-val">sem informação</span>';
+  const valData = (v)=> v ? v : '<span class="empty-val">sem data</span>';
   body.innerHTML = shown.map(r=>`<tr>
     <td>${val(r[PIDX.nome])}</td>
     <td class="contact-col">${val(r[PIDX.email])}</td>
     <td class="contact-col">${val(r[PIDX.telefone])}</td>
     <td>${val(r[PIDX.segmento])}</td>
     <td>${val(r[PIDX.status])}</td>
+    <td>${valData(r[PIDX.data])}</td>
     <td>${r[PIDX.aluno]==="Aluno" ? '<span class="badge entrou-grande">Aluno</span>' : '<span class="badge compra1">Não Aluno</span>'}</td>
   </tr>`).join("");
   if(rows.length > MAX_ROWS){
-    body.innerHTML += `<tr><td colspan="6" class="count-pill">Mostrando ${MAX_ROWS} de ${rows.length}.</td></tr>`;
+    body.innerHTML += `<tr><td colspan="7" class="count-pill">Mostrando ${MAX_ROWS} de ${rows.length}.</td></tr>`;
   }
 }
 function exportCsvParalelo(){
-  const headers = ["Nome","Email","Telefone","Segmento","Status","Status Aluno"];
+  const headers = ["Nome","Email","Telefone","Segmento","Status","Status Aluno","Data Arrematação"];
   const lines = [headers.map(csvEscape).join(";")];
-  filteredParallelData().forEach(r=> lines.push(r.map(csvEscape).join(";")));
+  filteredParallelData().forEach(r=> lines.push([r[PIDX.nome],r[PIDX.email],r[PIDX.telefone],r[PIDX.segmento],r[PIDX.status],r[PIDX.aluno],r[PIDX.data]].map(csvEscape).join(";")));
   downloadCsv(lines, "leads_paralelos");
 }
 
